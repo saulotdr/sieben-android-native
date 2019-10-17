@@ -1,8 +1,8 @@
 package com.sieben.docsystem.sieben;
 
 class User {
-    String login;
-    String password;
+    private String login;
+    private String password;
 
     String getLogin() {
         return login;

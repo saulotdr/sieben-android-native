@@ -12,7 +12,6 @@ import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -68,14 +67,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String[] permissions, int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_PERMISSION_ID: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length <= 0
-                        && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                    //TODO: Show error screen
-                    return;
-                }
+        if (requestCode == REQUEST_PERMISSION_ID) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length <= 0
+                    && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                //TODO: Show error screen
             }
         }
     }
@@ -88,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
         return user.toString();
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private void initializeComponents() {
         mWebView = findViewById(R.id.webView);
         WebSettings settings = mWebView.getSettings();
@@ -156,12 +153,11 @@ public class MainActivity extends AppCompatActivity {
                 if (filePathCallback != null) {
                     filePathCallback.onReceiveValue(null);
                 }
-                openFileChooser(filePathCallback, "ok");
-//                return super.onShowFileChooser(webView, filePathCallback, fileChooserParams);
+                openFileChooser();
                 return true;
             }
 
-            void openFileChooser(ValueCallback uploadMsg, String acceptType) {
+            void openFileChooser() {
                 Intent i = new Intent(Intent.ACTION_GET_CONTENT);
                 i.addCategory(Intent.CATEGORY_OPENABLE);
                 i.setType(getString(R.string.mime_types));
@@ -174,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void onRefresh() {
+    private void onRefresh() {
         Log.i(TAG, "onRefresh()");
         loadWebView(mWebView.getUrl());
     }

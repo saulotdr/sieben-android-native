@@ -14,9 +14,7 @@
 
     <style name="AlertDialogCustom" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="android:textColor">@android:color/white</item>
-        <item name="android:font">@android:color/white</item>
-
-        <item name="android:background">#46b8da</item>
+        <item name="android:background">@color/colorPrimary</item>
     </style>
 
 </resources>

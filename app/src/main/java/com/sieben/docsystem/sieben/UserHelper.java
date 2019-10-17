@@ -9,7 +9,7 @@ import android.util.Log;
 class UserHelper {
 
     private static final String TAG = UserHelper.class.getSimpleName();
-    private Context mContext;
+    private final Context mContext;
     private SharedPreferences mSharedPreferences;
     private static final String USER = "user";
     private static final String PASSWORD = "password";
