@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:backgroundTint="#817e7e"
+
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <EditText
+        android:id="@+id/edtName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dp"
+        app:layout_constraintLeft_toRightOf="@id/txtName"
+        android:ems="10"
+        android:inputType="text"
+        android:hint="Usuário" />
+
+    <TextView
+        android:id="@+id/txtName"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:fontFamily="sans-serif-black"
+        android:layout_marginRight="10dp"
+        app:layout_constraintBottom_toBottomOf="@id/edtName"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Usuário" />
+
+    <EditText
+        android:id="@+id/edtPassword"
+        app:layout_constraintLeft_toRightOf="@id/txtPassword"
+        app:layout_constraintTop_toBottomOf="@id/edtName"
+        app:layout_constraintLeft_toLeftOf="@id/edtName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        android:hint="Senha" />
+
+    <TextView
+        android:id="@+id/txtPassword"
+        app:layout_constraintTop_toBottomOf="@id/txtName"
+        app:layout_constraintLeft_toLeftOf="@id/txtName"
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:fontFamily="sans-serif-black"
+        app:layout_constraintBottom_toBottomOf="@id/edtPassword"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:text="Senha" />
+</android.support.constraint.ConstraintLayout>
