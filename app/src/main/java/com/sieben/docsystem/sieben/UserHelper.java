@@ -33,8 +33,8 @@ class UserHelper {
     }
 
     void setCredentials(User user) {
-        if (user == null || user.getLogin() == null || user.getPassword() == null) {
-            Log.e(TAG, "setCredentials(): Cannot write an empty user");
+        if (user == null || user.getPassword() == null | user.getLogin() == null) {
+            Log.e(TAG, "setCredentials(): Cannot write a null user");
             return;
         }
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(

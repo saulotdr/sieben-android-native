@@ -1,5 +1,7 @@
 package com.sieben.docsystem.sieben;
 
+import android.text.TextUtils;
+
 class User {
     private String login;
     private String password;
@@ -21,12 +23,11 @@ class User {
     }
 
     public String toString() {
-        String result = login;
         if (login.contains("\\")){
-            result = login.replace("\\", "\\\\");
+            login = login.replace("\\", "\\\\");
         }
         return "javascript: " +
-                "var user = document.getElementById('user').value='"+ result +"'; " +
+                "var user = document.getElementById('user').value='"+ login +"'; " +
                 "var pass = document.getElementById('password').value='"+ password +"';";
     }
 }
