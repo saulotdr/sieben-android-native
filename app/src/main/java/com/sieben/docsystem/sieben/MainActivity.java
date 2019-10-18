@@ -9,9 +9,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -29,8 +32,6 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import java.io.FileNotFoundException;
-
 public class MainActivity extends AppCompatActivity {
 
     private static final String MAIN = "http://docsystem5.clouddoc.com.br/SimplePortal/Pages/Login.html";
@@ -41,11 +42,16 @@ public class MainActivity extends AppCompatActivity {
     private WebView mWebView;
     private UserHelper mUserHelper;
     private MenuItem mBtnMenuItemLogins;
+    private ValueCallback<Uri[]> mUploadContent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#817e7e")));
+        }
         mUserHelper = new UserHelper(getApplicationContext());
         initializeComponents();
         loadWebView(MAIN);
@@ -116,7 +122,14 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.btnRefresh) {
             onRefresh();
         }
+        if (id == R.id.btnFind) {
+            showFindDropDownMenu();
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showFindDropDownMenu() {
+
     }
 
     @Override
@@ -131,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(final WebView view, String url) {
                 Log.i(TAG, "shouldOverrideUrlLoading(): loading: " + url);
-                if(!url.equals(MAIN)) {
+                if (!url.equals(MAIN)) {
                     mBtnMenuItemLogins.setVisible(false);
                 }
                 return false;
@@ -150,9 +163,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
-                if (filePathCallback != null) {
-                    filePathCallback.onReceiveValue(null);
+                if (mUploadContent != null) {
+                    mUploadContent.onReceiveValue(null);
+                    mUploadContent = null;
                 }
+                mUploadContent = filePathCallback;
+
                 openFileChooser();
                 return true;
             }
@@ -169,7 +185,6 @@ public class MainActivity extends AppCompatActivity {
         mWebView.loadUrl(url);
     }
 
-
     private void onRefresh() {
         Log.i(TAG, "onRefresh()");
         loadWebView(mWebView.getUrl());
@@ -180,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
         LayoutInflater inflater = this.getLayoutInflater();
         final View dialogView = inflater.inflate(R.layout.dialog, null);
         builder.setView(dialogView);
-        builder.setTitle("Salvar dados de login");
+        builder.setTitle("Salvar Login");
         builder.setCancelable(true);
         builder.setPositiveButton("Salvar", new DialogInterface.OnClickListener() {
             @Override
@@ -188,15 +203,17 @@ public class MainActivity extends AppCompatActivity {
                 EditText edtName = dialogView.findViewById(R.id.edtName);
                 EditText edtPassword = dialogView.findViewById(R.id.edtPassword);
                 User user = new User();
-                user.setLogin(TextUtils.isEmpty(edtName.getText().toString()) ?
-                        null :
-                        edtName.getText().toString());
-                user.setPassword(TextUtils.isEmpty(edtPassword.getText().toString()) ?
-                        null :
-                        edtPassword.getText().toString());
+                user.setLogin(edtName.getText().toString());
+                user.setPassword(edtPassword.getText().toString());
                 mUserHelper.setCredentials(user);
                 mWebView.loadUrl(user.toString());
                 showToast("Usuário salvo com sucesso");
+            }
+        });
+        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
             }
         });
         builder.show();
@@ -223,29 +240,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent intent) {
-        if (requestCode == 1001) {
+        if (requestCode == FILE_CHOOSER) {
             if (intent == null || resultCode != Activity.RESULT_OK) {
                 Log.e(TAG, "onActivityResult(): Error");
                 return;
             }
-            Uri data = intent.getData();
-            if (data == null) {
-                Log.e(TAG, "onActivityResult(): Null data");
+            if (mUploadContent == null) {
                 return;
             }
-            getDataFromDocumentProvider(data);
-        }
-    }
-
-    private void getDataFromDocumentProvider(Uri data) {
-        Uri documentUri = Uri.parse(data.getScheme() + "://"
-                + data.getAuthority()
-                + data.getEncodedPath());
-        try {
-            getApplicationContext().getContentResolver().openInputStream(documentUri);
-        } catch (FileNotFoundException e) {
-            Log.e(TAG, "getDataFromDocumentProvider(): Invalid document");
-            showToast("Impossível abrir arquivo!");
+            mUploadContent.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, intent));
+            mUploadContent = null;
         }
     }
 }
