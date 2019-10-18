@@ -12,35 +12,38 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="15dp"
+        android:textColor="@color/colorPrimaryDark"
+        android:theme="@style/EditTextTheme"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toRightOf="@id/txtName"
         android:ems="10"
-        android:inputType="text"
-        android:hint="Usuário" />
+        android:inputType="text" />
 
     <TextView
         android:id="@+id/txtName"
         android:layout_marginTop="10dp"
         android:layout_marginLeft="10dp"
-        android:fontFamily="sans-serif-black"
+        android:fontFamily="sans-serif"
+        android:textColor="@color/colorPrimaryDark"
         android:layout_marginRight="10dp"
         app:layout_constraintBottom_toBottomOf="@id/edtName"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Usuário" />
+        android:text="USUÁRIO" />
 
     <EditText
         android:id="@+id/edtPassword"
         app:layout_constraintLeft_toRightOf="@id/txtPassword"
         app:layout_constraintTop_toBottomOf="@id/edtName"
         app:layout_constraintLeft_toLeftOf="@id/edtName"
+        android:theme="@style/EditTextTheme"
+        android:textColor="@color/colorPrimaryDark"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="text"
-        android:hint="Senha" />
+        android:inputType="textVisiblePassword" />
 
     <TextView
         android:id="@+id/txtPassword"
@@ -48,9 +51,9 @@
         app:layout_constraintLeft_toLeftOf="@id/txtName"
         android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
-        android:fontFamily="sans-serif-black"
+        android:textColor="@color/colorPrimaryDark"
+        android:fontFamily="sans-serif"
         app:layout_constraintBottom_toBottomOf="@id/edtPassword"
         android:layout_height="wrap_content"
-        android:inputType="text"
-        android:text="Senha" />
+        android:text="SENHA" />
 </android.support.constraint.ConstraintLayout>
