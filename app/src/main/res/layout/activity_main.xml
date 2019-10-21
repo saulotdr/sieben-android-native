@@ -16,12 +16,25 @@
         android:layout_marginBottom="0dp">
 
     </WebView>
-    <EditText
-        android:layout_width="match_parent"
-        
-        android:theme="@style/EditTextFindTheme"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_height="wrap_content"
-        android:hint="oi"/>
 
+    <studio.carbonylgroup.textfieldboxes.TextFieldBoxes
+        android:id="@+id/text_field_boxes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:hasClearButton="true"
+        app:errorColor="@color/A400red"
+        app:singleLine="true"
+        app:panelBackgroundColor="#ffffff"
+        app:endIcon="@drawable/baseline_arrow_forward_24"
+        app:labelText="@string/find_pt_br"
+        >
+
+        <studio.carbonylgroup.textfieldboxes.ExtendedEditText
+            android:id="@+id/extended_edit_text"
+            android:layout_width="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_height="wrap_content"
+            />
+
+    </studio.carbonylgroup.textfieldboxes.TextFieldBoxes>
 </android.support.constraint.ConstraintLayout>

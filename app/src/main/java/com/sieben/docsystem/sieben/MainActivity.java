@@ -1,18 +1,14 @@
 package com.sieben.docsystem.sieben;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -24,7 +20,9 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
+import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -32,53 +30,44 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import studio.carbonylgroup.textfieldboxes.TextFieldBoxes;
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String MAIN = "http://docsystem5.clouddoc.com.br/SimplePortal/Pages/Login.html";
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int FILE_CHOOSER = 1001;
-    private static final int REQUEST_PERMISSION_ID = 1002;
+    private static boolean GO_BACKWARDS = false;
+    private static String mQuery = "";
 
     private WebView mWebView;
     private UserHelper mUserHelper;
-    private MenuItem mBtnMenuItemLogins;
+    private MenuItem mBtnMenuItemLogin;
+    private MenuItem mBtnMenuItemFind;
+    private MenuItem mBtnMenuItemRefresh;
     private ValueCallback<Uri[]> mUploadContent;
+    private TextFieldBoxes mFindTextField;
+    private EditText mFindEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initializeComponents();
+        initializeHelpers();
+        addListeners();
+        decorateActionBar();
+        loadWebView(MAIN);
+    }
+
+    private void initializeHelpers() {
+        mUserHelper = new UserHelper(getApplicationContext());
+    }
+
+    private void decorateActionBar() {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#817e7e")));
-        }
-        mUserHelper = new UserHelper(getApplicationContext());
-        initializeComponents();
-        loadWebView(MAIN);
-        requestPermissions();
-    }
-
-    @TargetApi(Build.VERSION_CODES.M)
-    private void requestPermissions() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return;
-        }
-        if (getApplicationContext().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    REQUEST_PERMISSION_ID);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String[] permissions, int[] grantResults) {
-        if (requestCode == REQUEST_PERMISSION_ID) {
-            // If request is cancelled, the result arrays are empty.
-            if (grantResults.length <= 0
-                    && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
-                //TODO: Show error screen
-            }
         }
     }
 
@@ -92,11 +81,13 @@ public class MainActivity extends AppCompatActivity {
 
     @SuppressLint("SetJavaScriptEnabled")
     private void initializeComponents() {
+        mFindTextField = findViewById(R.id.text_field_boxes);
+        mFindEditText = findViewById(R.id.extended_edit_text);
         mWebView = findViewById(R.id.webView);
+        mWebView.addJavascriptInterface(this, "android");
         WebSettings settings = mWebView.getSettings();
         settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         settings.setJavaScriptEnabled(true);
-        settings.setSavePassword(true);
         settings.setDomStorageEnabled(true);
         settings.setSupportZoom(true);
         settings.setAppCacheEnabled(true);
@@ -105,17 +96,54 @@ public class MainActivity extends AppCompatActivity {
         settings.setAllowFileAccess(true);
     }
 
+    private void addListeners() {
+        mFindTextField.getEndIconImageButton().setOnClickListener(this);
+    }
+
+    @SuppressWarnings("unused")
+    @JavascriptInterface
+    public void onWindowFind(String value) {
+        Boolean state = Boolean.valueOf(value);
+        if (!state) {
+            GO_BACKWARDS = !GO_BACKWARDS;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mFindTextField.setError("", true);
+                    showToast(getString(R.string.not_found_pt_br));
+                }
+            });
+        } else {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    showToast("Termo '" + mQuery + "' encontrado");
+                }
+            });
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.mymenu, menu);
-        mBtnMenuItemLogins = menu.findItem(R.id.btnManageLogins);
+        mBtnMenuItemLogin = menu.findItem(R.id.btnManageLogins);
+        mBtnMenuItemRefresh = menu.findItem(R.id.btnRefresh);
+        mBtnMenuItemFind = menu.findItem(R.id.btnFind);
+        setDefaultComponentsState();
         return super.onCreateOptionsMenu(menu);
+    }
+
+    private void setDefaultComponentsState() {
+        //All components in this method will be visible when the current page isn't the login page
+        mBtnMenuItemRefresh.setVisible(false);
+        mBtnMenuItemFind.setVisible(false);
+        //Only triggered by find button in menu item
+        mFindTextField.setVisibility(View.INVISIBLE);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         if (id == R.id.btnManageLogins) {
             openDialog();
         }
@@ -129,7 +157,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showFindDropDownMenu() {
-
+        if (mFindTextField.getVisibility() == View.VISIBLE) {
+            mFindTextField.setVisibility(View.INVISIBLE);
+        } else {
+            mFindTextField.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -144,8 +176,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(final WebView view, String url) {
                 Log.i(TAG, "shouldOverrideUrlLoading(): loading: " + url);
-                if (!url.equals(MAIN)) {
-                    mBtnMenuItemLogins.setVisible(false);
+                if (url.equals(MAIN)) {
+                    loadComponentsStatePerPage(true);
+                } else {
+                    loadComponentsStatePerPage(false);
                 }
                 return false;
             }
@@ -168,7 +202,6 @@ public class MainActivity extends AppCompatActivity {
                     mUploadContent = null;
                 }
                 mUploadContent = filePathCallback;
-
                 openFileChooser();
                 return true;
             }
@@ -178,11 +211,24 @@ public class MainActivity extends AppCompatActivity {
                 i.addCategory(Intent.CATEGORY_OPENABLE);
                 i.setType(getString(R.string.mime_types));
                 MainActivity.this.startActivityForResult(
-                        Intent.createChooser(i, "Escolha seu arquivo"),
+                        Intent.createChooser(i, getString(R.string.choose_file_pt_br)),
                         FILE_CHOOSER);
             }
         });
         mWebView.loadUrl(url);
+    }
+
+    private void loadComponentsStatePerPage(boolean isMainPage) {
+        if (isMainPage) {
+            mFindTextField.setVisibility(View.INVISIBLE);
+            mBtnMenuItemLogin.setVisible(true);
+            mBtnMenuItemFind.setVisible(false);
+            mBtnMenuItemRefresh.setVisible(false);
+        } else {
+            mBtnMenuItemLogin.setVisible(false);
+            mBtnMenuItemRefresh.setVisible(true);
+            mBtnMenuItemFind.setVisible(true);
+        }
     }
 
     private void onRefresh() {
@@ -193,11 +239,11 @@ public class MainActivity extends AppCompatActivity {
     private void openDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
         LayoutInflater inflater = this.getLayoutInflater();
-        final View dialogView = inflater.inflate(R.layout.dialog, null);
+        @SuppressLint("InflateParams") final View dialogView = inflater.inflate(R.layout.dialog, null);
         builder.setView(dialogView);
-        builder.setTitle("Salvar Login");
+        builder.setTitle(getString(R.string.save_login_pt_br));
         builder.setCancelable(true);
-        builder.setPositiveButton("Salvar", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(getString(R.string.save_pt_br), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 EditText edtName = dialogView.findViewById(R.id.edtName);
@@ -207,10 +253,10 @@ public class MainActivity extends AppCompatActivity {
                 user.setPassword(edtPassword.getText().toString());
                 mUserHelper.setCredentials(user);
                 mWebView.loadUrl(user.toString());
-                showToast("Usuário salvo com sucesso");
+                showToast(getString(R.string.user_saved_pt_br));
             }
         });
-        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(getString(R.string.cancel_pt_br), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -229,7 +275,17 @@ public class MainActivity extends AppCompatActivity {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_BACK:
                     if (mWebView.canGoBack()) {
+                        WebBackForwardList mWebBackForwardList = mWebView.copyBackForwardList();
+                        String lastPage = mWebBackForwardList
+                                .getItemAtIndex(mWebBackForwardList.getCurrentIndex()-1).getUrl();
+                        if (lastPage.equals(MAIN)) {
+                            loadComponentsStatePerPage(true);
+                        } else {
+                            loadComponentsStatePerPage(false);
+                        }
                         mWebView.goBack();
+                    } else {
+                        finish();
                     }
                     return true;
             }
@@ -250,6 +306,20 @@ public class MainActivity extends AppCompatActivity {
             }
             mUploadContent.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, intent));
             mUploadContent = null;
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.text_field_boxes_end_icon_button) {
+            mQuery = mFindEditText.getText().toString().toLowerCase().trim();
+            if (TextUtils.isEmpty(mQuery)) {
+                mFindTextField.setError("", true);
+                showToast(getString(R.string.not_found_pt_br));
+                return;
+            }
+            String command = "window.find('" + mQuery + "', false, " + GO_BACKWARDS + ")";
+            mWebView.loadUrl("javascript:android.onWindowFind(" + command + ")");
         }
     }
 }
