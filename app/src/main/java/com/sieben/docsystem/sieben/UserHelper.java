@@ -1,5 +1,6 @@
 package com.sieben.docsystem.sieben;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -32,6 +33,7 @@ class UserHelper {
         return user;
     }
 
+    @SuppressLint("ApplySharedPref")
     void setCredentials(User user) {
         if (user == null || user.getPassword() == null | user.getLogin() == null) {
             Log.e(TAG, "setCredentials(): Cannot write a null user");

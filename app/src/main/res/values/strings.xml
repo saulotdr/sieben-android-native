@@ -1,6 +1,15 @@
 <resources>
     <string name="app_name">Sieben GT</string>
-    <string name="title_activity_login">LoginActivity</string>
-    <string name="title_activity_main2">Main2Activity</string>
     <string name="mime_types">application/*, text/*</string>
+    <string name="user_pt_br">USUÁRIO</string>
+    <string name="password_pt_br">SENHA</string>
+    <string name="refresh_pt_br">Atualizar</string>
+    <string name="save_login_pt_br">Salvar Login</string>
+    <string name="find_pt_br">Procurar</string>
+    <string name="choose_file_pt_br">Escolha seu arquivo</string>
+    <string name="save_pt_br">Salvar</string>
+    <string name="user_saved_pt_br">Usuário salvo com sucesso</string>
+    <string name="cancel_pt_br">Cancelar</string>
+    <string name="not_found_pt_br">Não encontrado</string>
+
 </resources>

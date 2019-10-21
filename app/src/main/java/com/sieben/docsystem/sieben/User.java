@@ -1,6 +1,6 @@
 package com.sieben.docsystem.sieben;
 
-import android.text.TextUtils;
+import android.support.annotation.NonNull;
 
 class User {
     private String login;
@@ -22,6 +22,7 @@ class User {
         this.password = password;
     }
 
+    @NonNull
     public String toString() {
         if (login.contains("\\")){
             login = login.replace("\\", "\\\\");
