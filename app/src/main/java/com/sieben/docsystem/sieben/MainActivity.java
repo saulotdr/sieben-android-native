@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return user.toString();
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint({"SetJavaScriptEnabled", "JavascriptInterface"})
     private void initializeComponents() {
         mFindTextField = findViewById(R.id.text_field_boxes);
         mFindEditText = findViewById(R.id.extended_edit_text);
