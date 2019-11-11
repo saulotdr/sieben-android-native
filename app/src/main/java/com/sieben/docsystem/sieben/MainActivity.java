@@ -30,6 +30,8 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.lang.reflect.Method;
+
 import studio.carbonylgroup.textfieldboxes.TextFieldBoxes;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -88,6 +90,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         WebSettings settings = mWebView.getSettings();
         settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
         settings.setJavaScriptEnabled(true);
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
+        settings.setSupportMultipleWindows(true);
+        settings.setUseWideViewPort(true);
         settings.setDomStorageEnabled(true);
         settings.setSupportZoom(true);
         settings.setAppCacheEnabled(true);
@@ -98,29 +103,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void addListeners() {
         mFindTextField.getEndIconImageButton().setOnClickListener(this);
-    }
-
-    @SuppressWarnings("unused")
-    @JavascriptInterface
-    public void onWindowFind(String value) {
-        Boolean state = Boolean.valueOf(value);
-        if (!state) {
-            GO_BACKWARDS = !GO_BACKWARDS;
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mFindTextField.setError("", true);
-                    showToast(getString(R.string.not_found_pt_br));
-                }
-            });
-        } else {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    showToast("Termo '" + mQuery + "' encontrado");
-                }
-            });
-        }
     }
 
     @Override
@@ -236,18 +218,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         loadWebView(mWebView.getUrl());
     }
 
+    @SuppressLint("InflateParams")
     private void openDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogCustom));
         LayoutInflater inflater = this.getLayoutInflater();
-        @SuppressLint("InflateParams") final View dialogView = inflater.inflate(R.layout.dialog, null);
+        final View dialogView = inflater.inflate(R.layout.dialog, null);
+        final EditText edtName = dialogView.findViewById(R.id.edtName);
+        User user = mUserHelper.getCredentials();
+        if (user != null) {
+            edtName.setText(user.getLogin());
+        }
+        final EditText edtPassword = dialogView.findViewById(R.id.edtPassword);
         builder.setView(dialogView);
         builder.setTitle(getString(R.string.save_login_pt_br));
         builder.setCancelable(true);
         builder.setPositiveButton(getString(R.string.save_pt_br), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                EditText edtName = dialogView.findViewById(R.id.edtName);
-                EditText edtPassword = dialogView.findViewById(R.id.edtPassword);
                 User user = new User();
                 user.setLogin(edtName.getText().toString());
                 user.setPassword(edtPassword.getText().toString());
@@ -318,8 +305,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 showToast(getString(R.string.not_found_pt_br));
                 return;
             }
-            String command = "window.find('" + mQuery + "', false, " + GO_BACKWARDS + ")";
-            mWebView.loadUrl("javascript:android.onWindowFind(" + command + ")");
+
+            mWebView.findAll(mQuery);
+            try {
+                Method m = WebView.class.getMethod("setFindIsUp", Boolean.TYPE);
+                m.invoke(mWebView, true);
+            } catch (Throwable ignored) {
+            }
         }
     }
 }
