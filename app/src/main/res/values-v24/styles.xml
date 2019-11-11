@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AlertDialogCustom" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">#817e7e</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:contextPopupMenuStyle"></item>
+    </style>
+</resources>

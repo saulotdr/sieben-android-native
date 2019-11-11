@@ -1,8 +1,8 @@
 <resources>
 
-    <style name="AlertDialogCustom" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <style name="AlertDialogCustom" parent="Theme.AppCompat.Dialog.Alert">
         <item name="android:textColor">@android:color/white</item>
-        <item name="android:background">#8f8f8f</item>
+        <item name="android:background">#817e7e</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
