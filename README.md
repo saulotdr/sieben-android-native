@@ -22,4 +22,4 @@ $ .gradlew build
 You should see the **.apk** file in `app/build/debug` or `app/build/release` (depending on the build variant you have chosen)
 
 # Versions
-You can see all the released versions in [Releases](releases) tab
+You can see all the released versions in [Releases](https://github.com/saulotdr/sieben/releases) tab
