@@ -36,7 +36,7 @@ import studio.carbonylgroup.textfieldboxes.TextFieldBoxes;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private static final String MAIN = "http://docsystem5.clouddoc.com.br/SimplePortal/Pages/Login.html";
+    private static final String MAIN = "http://dsenv01.cloudapp.net/SimplePortal/Pages/Tasks.html";
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int FILE_CHOOSER = 1001;
     private static boolean GO_BACKWARDS = false;
